@@ -199,8 +199,6 @@ ggplot(plot_later_3w %>%
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
-## GA groupings across 6 month intervals## 
-
 
 ##Drop all NA or empty rows## 
 later <- later[!is.na(later$ega_wks) & later$ega_wks != "", ]
