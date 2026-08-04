@@ -125,11 +125,64 @@ chisq.test(procedure_type_ga)
 hist(
   later$ega_wks[later$ega_wks != 0],
   breaks = 10,
+  freq = FALSE,
   main = "Distribution of Gestational Age Weeks (Excluding Zeros)",
   xlab = "Weeks",
+  ylab = "Percentage of the Patient Population",
   col = "lightblue",
-  border = "white"
+  border = "white",
+  axes = FALSE
 )
+
+axis(1)
+
+axis(
+  2,
+  at = pretty(par("usr")[3:4]),
+  labels = paste0(
+    round(pretty(par("usr")[3:4]) * 100, 1),
+    "%"
+  )
+)
+
+# Define categories
+ega_cat <- cut(
+  later$ega_wks,
+  breaks = c(-Inf, 9, 11, 13, 16, 21, Inf),
+  labels = c("<= 8", "9-10", "11-12", "13-15", "16-20", ">=21"),
+  right = FALSE
+)
+
+# Calculate percentages of total patients
+pct <- prop.table(table(ega_cat)) * 100
+
+# Create bar chart
+barplot(
+  pct,
+  main = "Gestational Age Distribution",
+  xlab = "Gestational Age (Weeks)",
+  ylab = "Percentage of Patient Population",
+  col = "lightblue",
+  border = "white",
+  ylim = c(0, max(pct) * 1.1)
+)
+
+# Add percent labels above bars
+text(
+  x = seq_along(pct),
+  y = pct,
+  labels = paste0(round(pct, 1), "%"),
+  pos = 3
+)
+
+
+
+
+
+
+
+
+box()
 
 summary(later$ega_wks)
 
