@@ -142,3 +142,47 @@ ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
     color = "Cylinders"
   ) +
   theme_uic()
+
+
+
+uic_palette <- c(
+  uic_colors$slate,
+  uic_colors$blue,
+  uic_colors$green,
+  uic_colors$brick,
+  uic_colors$red,
+  uic_colors$navy,
+  uic_colors$maroon
+)
+
+ggplot(
+  plot_later_3w %>% filter(!is.na(ega_cat)),
+  aes(
+    x = six_month_period,
+    fill = ega_cat
+  )
+) +
+  geom_bar(position = position_stack(reverse = TRUE)) +
+  geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    position = position_stack(vjust = 0.5, reverse = TRUE),
+    size = 3,
+    color = "black"
+  ) +
+  scale_fill_manual(
+    values = colorRampPalette(uic_palette)(
+      nlevels(plot_later_3w$ega_cat)
+    )
+  ) +
+  labs(
+    x = "Six Month Period",
+    y = "Number of Patients",
+    fill = "Estimated GA (wks)",
+    title = "Distribution of Later Care GA by Six Month Period"
+  ) +
+  theme_uic() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "right"
+  )
