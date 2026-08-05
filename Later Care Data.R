@@ -4,7 +4,7 @@
 # Designate working directory # 
 setwd("//HomeDrive/HDriveProd/kfmercer/Desktop/UIC/Abortion Tracking/REDCap")
 getwd()
-later <- read.csv("//HomeDrive/HDriveProd/kfmercer/Desktop/UIC/Abortion Tracking/REDCap/AbortionTracking2024-LaterCarePatients_DATA_2026-07-31_0954.csv")
+later <- read.csv("//HomeDrive/HDriveProd/kfmercer/Desktop/UIC/Abortion Tracking/REDCap/AbortionTracking2024-LaterCarePatients_DATA_2026-08-04_1414.csv")
 
 # Upload packages # 
 library(tidyverse)
@@ -125,64 +125,11 @@ chisq.test(procedure_type_ga)
 hist(
   later$ega_wks[later$ega_wks != 0],
   breaks = 10,
-  freq = FALSE,
   main = "Distribution of Gestational Age Weeks (Excluding Zeros)",
   xlab = "Weeks",
-  ylab = "Percentage of the Patient Population",
   col = "lightblue",
-  border = "white",
-  axes = FALSE
+  border = "white"
 )
-
-axis(1)
-
-axis(
-  2,
-  at = pretty(par("usr")[3:4]),
-  labels = paste0(
-    round(pretty(par("usr")[3:4]) * 100, 1),
-    "%"
-  )
-)
-
-# Define categories
-ega_cat <- cut(
-  later$ega_wks,
-  breaks = c(-Inf, 9, 11, 13, 16, 21, Inf),
-  labels = c("<= 8", "9-10", "11-12", "13-15", "16-20", ">=21"),
-  right = FALSE
-)
-
-# Calculate percentages of total patients
-pct <- prop.table(table(ega_cat)) * 100
-
-# Create bar chart
-barplot(
-  pct,
-  main = "Gestational Age Distribution",
-  xlab = "Gestational Age (Weeks)",
-  ylab = "Percentage of Patient Population",
-  col = "lightblue",
-  border = "white",
-  ylim = c(0, max(pct) * 1.1)
-)
-
-# Add percent labels above bars
-text(
-  x = seq_along(pct),
-  y = pct,
-  labels = paste0(round(pct, 1), "%"),
-  pos = 3
-)
-
-
-
-
-
-
-
-
-box()
 
 summary(later$ega_wks)
 
@@ -217,39 +164,48 @@ later <- later %>%
     six_month_period == "2025_H2" ~ "2025 Jul-Dec", 
     six_month_period == "2026_H1" ~ "2026 Jan-Jun"))
 
-##3 week GA intervals over time ## 
 
-breaks3 <- seq(22,
-               max(later$ega_wks,na.rm = TRUE)
-               +3, by = 3)
-labels3 <- paste(
-  breaks3[-length(breaks3)],
-  breaks3[-1] - 1, 
-  sep = "-"
+###Bring theme## 
+uic_palette <- c(
+  uic_colors$slate,
+  uic_colors$blue,
+  uic_colors$green,
+  uic_colors$brick,
+  uic_colors$red,
+  uic_colors$navy,
+  uic_colors$maroon
 )
-plot_later_3w <- later %>%
-  mutate(ega_cat = cut(ega_wks, 
-                       breaks = breaks3,
-                       right = FALSE, 
-                       include.lowest = TRUE,
-                       labels = labels3))
 
-ggplot(plot_later_3w %>%
-         filter(!is.na(ega_cat)), aes(x=six_month_period, 
-                          fill = ega_cat))+
-  geom_bar() + geom_text(
+ggplot(
+  plot_later_3w %>% filter(!is.na(ega_cat)),
+  aes(
+    x = six_month_period,
+    fill = ega_cat
+  )
+) +
+  geom_bar(position = position_stack(reverse = TRUE)) +
+  geom_text(
     stat = "count",
-    aes(label = after_stat(count)), 
-    position = position_stack(vjust = 0.5), 
-    size = 3, color = "black") +
-    labs(
-    x= "Six Month Period", 
-    y = "Number of Patients", 
-    fill = "Estimated GA (wks)", 
+    aes(label = after_stat(count)),
+    position = position_stack(vjust = 0.5, reverse = TRUE),
+    size = 3,
+    color = "black"
+  ) +
+  scale_fill_manual(
+    values = colorRampPalette(uic_palette)(
+      nlevels(plot_later_3w$ega_cat)
+    )
+  ) +
+  labs(
+    x = "Six Month Period",
+    y = "Number of Patients",
+    fill = "Estimated GA (wks)",
     title = "Distribution of Later Care GA by Six Month Period"
-  )+ 
-  theme_minimal()+ theme(
-    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  theme_uic() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "right"
   )
 
 
